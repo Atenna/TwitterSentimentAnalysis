@@ -1,0 +1,70 @@
+import sys
+import json
+
+sent_file = 0
+tweet_file = 0
+scores = 0
+unknown = 0
+sum_words = 0
+states = 0
+
+def hw():
+    afinnfile = sent_file
+    global scores
+    global unknown
+    global sum_words
+    global states 
+    scores = {} # initialize an empty dictionary for known words
+    unknown = {} # initialize a dictionary for new words
+    states = {}
+    sum_words = 0
+    for line in afinnfile:
+      term, score  = line.split("\t")  
+      scores[term] = int(score)
+    #print scores.items() 
+    
+    for tweet in tweet_file:
+      dic = json.loads(tweet)
+      coef = calculate_sentiment(tweet)
+      if 'text' in dic.keys() and dic['lang'] == 'en':
+        user = dic['user']
+        loc = user['location']
+	if len(loc)> 4 and loc[-4:-2].encode("utf8") == ", ":
+          #print user['location']
+	  state = str(loc[-2:]).upper().encode("utf8")
+	  #print state, len(state)
+	  #if state not in states: 
+	  states[state] = states.get(state, 0) + coef
+
+    maxim = str(max(states, key=states.get))
+    print maxim
+    #print len(maxim), len(str((int)(states[maxim])))
+
+def lines(fp):
+    print str(len(fp.readlines()))
+
+#method to calculate sentiment of a tweet
+def calculate_sentiment(tweet):
+    dic = json.loads(tweet)
+    coef = 0
+    if 'text' in dic.keys():
+      textp = dic['text']
+      sentence = textp.split(" ")
+      for word in sentence:
+	word = word.lower()
+	if word in scores: 
+	  coef = coef + scores.get(word, 0)
+    return coef
+
+
+def main():
+    global sent_file
+    global tweet_file
+    sent_file = open(sys.argv[1])
+    tweet_file = open(sys.argv[2])
+    hw()
+    #lines(sent_file)
+    #lines(tweet_file)
+
+if __name__ == '__main__':
+    main()

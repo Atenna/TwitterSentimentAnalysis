@@ -1,0 +1,43 @@
+import sys
+import json
+import re
+
+tweet_file = 0
+unknown = 0
+
+def hw():
+    global unknown
+    unknown = {}
+    sum_words = 0
+    sum_tweets = 0
+    
+    for tweet in tweet_file:
+      sum_tweets += 1
+      dic = json.loads(tweet)
+      if 'entities' in dic.keys():
+        entities = dic['entities'] #dictionary
+	tags = entities['hashtags'] #list
+	if tags is not None and len(tags) != 0 and tags[0] is not None:
+	  ef = tags[0]
+          unknown[ef['text'].encode("utf8")] = (unknown.get(ef['text'].encode("utf8"), 0) + 1)
+	  sum_words += 1 #sum al all used tags
+    i = 0
+    sum_words2 = len(unknown.keys()) #sum of unique tags
+    for i in range(10):
+      maxim = str(max(unknown, key=unknown.get))
+      #print maxim, (unknown[maxim]/(sum_words*(1.0)))
+      #print maxim, (unknown[maxim]/(sum_words2*(1.0)))
+      #print maxim, (unknown[maxim]/(sum_tweets*(1.0)))
+      del unknown[maxim]
+
+def lines(fp):
+    print str(len(fp.readlines()))
+
+
+def main():
+    global tweet_file
+    tweet_file = open(sys.argv[1])
+    hw()
+
+if __name__ == '__main__':
+    main()
